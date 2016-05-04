@@ -1,14 +1,11 @@
 language: python
 python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - "3.5-dev" # 3.5 development branch
-  - "nightly" # currently points to 3.6-dev
-# command to install dependencies
-install: "pip install -r requirements.txt"
-# command to run tests
-script: nosetests
+  - 2.7
+  - 3.4
+install: 
+  - pip install -r requirements.txt 
+  - pip install -r tests/test-requirements.txt
+script:
+    - nosetests --with-coverage --cover-package=seo_report tests.unit
+after_success:
+  - coveralls
