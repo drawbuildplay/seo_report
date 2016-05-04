@@ -1,5 +1,6 @@
 coverage
 flake8
+pep8
 mock
 nose
 python-coveralls
