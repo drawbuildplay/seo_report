@@ -22,7 +22,7 @@ setup(
     packages = find_packages(),
     entry_points={
         'console_scripts': [
-            'seoreport = seo_report:main'
+            'seoreport = seo_report.cmd:main'
         ]
     }
 )
