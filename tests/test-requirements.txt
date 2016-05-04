@@ -1,1 +1,6 @@
+coverage
+flake8
+mock
 nose
+python-coveralls
+tox

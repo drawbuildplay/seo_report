@@ -3,8 +3,7 @@ import website
 import sys
 
 
-if __name__ == '__main__':
-
+def main():
     if len(sys.argv) == 2:
         site_domain = sys.argv[1]
         
@@ -17,6 +16,8 @@ if __name__ == '__main__':
         spider = website.Spider(site_domain, site_map)
         spider.crawl()
     else:
-        print ("Usage: python report_seo www.domain.com [/sitemap.xml]")
+        print ("Usage: seoreport http://www.domain.com [/sitemap.xml]")
         exit
         
+if __name__ == "__main__":
+    sys.exit(main())

@@ -10,22 +10,17 @@ the SEO guidelines from Google's SEO Starter Guide:
 http://static.googleusercontent.com/media/www.google.com/en//webmasters/docs/search-engine-optimization-starter-guide.pdf
 
 
-Setup
------
-
-```
-pip install -r requirements.txt
-```
-
 Usage
 -----
 
 ```
-./report/report_seo.py http://www.domain.com /sitemap.xml
+pip install -e .
+seoreport http://www.domain.com /sitemap.xml
 ```
 
 Testing
 -------
 ```
+pip install -r tests/test-requirements.txt
 nosetests
 ```
