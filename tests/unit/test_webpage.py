@@ -43,13 +43,7 @@ class WebpageTests(testtools.TestCase):
         doc = self.soup_file(html)
         self.wp._analyze_title(doc)
         
-        # nothing should be wrong with this title
-        self.assertEqual(len(self.wp.issues), 0)
-        
-        # title should have achieved the following
-        
-        # title should be added to the list of all titles
-        
-        
+        # one thing should be wrong with this title
+        self.assertEqual(len(self.wp.issues), 1)
         
         

@@ -69,7 +69,10 @@ class Webpage(object):
         """
         Validate the title
         """
-        self.title = t = doc.title.text
+        if doc.title:
+            self.title = t = doc.title.text
+        else:
+            self.title = t = ""
 
         # Avoid using extremely lengthy titles that are unhelpful to users
         length = len(t)
