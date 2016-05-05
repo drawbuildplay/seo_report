@@ -16,7 +16,7 @@ def main():
         spider = website.Spider(site_domain, site_map)
         spider.crawl()
     else:
-        print ("Usage: seoreport http://www.domain.com [/sitemap.xml]")
+        print("Usage: seoreport http://www.domain.com [/sitemap.xml]")
         exit
 
 if __name__ == "__main__":
