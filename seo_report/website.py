@@ -61,4 +61,4 @@ class Spider(object):
             # mark the page as crawled
             self.pages_crawled.append(page.strip().lower())
 
-        print json.dumps(self.report, indent=4, separators=(',', ': '))
+        print(json.dumps(self.report, indent=4, separators=(',', ': ')))
