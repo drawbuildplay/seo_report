@@ -8,5 +8,6 @@ install:
 script:
     - python setup.py install
     - nosetests --with-coverage --cover-package=seo_report tests.unit
+    - flake8 seo_report tests
 after_success:
   - coveralls
