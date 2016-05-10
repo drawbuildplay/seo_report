@@ -1,6 +1,7 @@
-import website
-
+import json
 import sys
+
+import website
 
 
 def main():
@@ -8,13 +9,19 @@ def main():
         site_domain = sys.argv[1]
 
         spider = website.Spider(site_domain)
-        spider.crawl()
+        report = spider.crawl()
+
+        print(json.dumps(report, indent=4, separators=(',', ': ')))
+
     elif len(sys.argv) == 3:
         site_domain = sys.argv[1]
         site_map = site_domain + sys.argv[2]
 
         spider = website.Spider(site_domain, site_map)
-        spider.crawl()
+        report = spider.crawl()
+
+        print(json.dumps(report, indent=4, separators=(',', ': ')))
+
     else:
         print("Usage: seoreport http://www.domain.com [/sitemap.xml]")
         exit

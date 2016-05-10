@@ -1,8 +1,7 @@
 import bs4
 
 import re
-import requests
-import urlparse
+from six.moves.urllib import parse
 
 from stop_words import ENGLISH_STOP_WORDS
 
@@ -17,8 +16,9 @@ class Webpage(object):
     website_titles = {}
     website_descriptions = {}
 
-    def __init__(self, page, website_titles, website_descriptions):
-        self.url = page
+    def __init__(self, page_url, html, website_titles, website_descriptions):
+        self.url = page_url
+        self.html = html
         self.title = None
         self.description = None
         self.keywords = {}
@@ -32,35 +32,27 @@ class Webpage(object):
         '''
         Analyze the Page
         '''
-        resp = requests.get(self.url)
+        soup = bs4.BeautifulSoup(self.html, "html.parser")
 
-        if resp.ok:
-            soup = bs4.BeautifulSoup(resp.content, "html.parser")
+        # per page analysis
+        self._analyze_title(soup)
+        self._analyze_description(soup)
+        self._analyze_url_structure(soup)
+        self._analyze_content(soup)
+        self._analyze_anchors(soup)
+        self._analyze_images(soup)
+        self._analyze_headings(soup)
+        self._analyze_keywords(soup)
+        self._analyze_wordcount(soup)
+        self._analyze_backlinks(soup)
+        self._analyze_social(soup)
+        self._analyze_pagespeed(soup)
+        self._analyze_sentiment(soup)
 
-            # per page analysis
-            self._analyze_title(soup)
-            self._analyze_description(soup)
-            self._analyze_url_structure(soup)
-            self._analyze_content(soup)
-            self._analyze_anchors(soup)
-            self._analyze_images(soup)
-            self._analyze_headings(soup)
-            self._analyze_keywords(soup)
-            self._analyze_wordcount(soup)
-            self._analyze_backlinks(soup)
-            self._analyze_social(soup)
-            self._analyze_pagespeed(soup)
-            self._analyze_sentiment(soup)
-
-            # site wide analysis
-            # self._analyze_crawlers(soup)
-            # self._analyze_mobile(soup)
-            # self._analyze_analytics(soup)
-
-        elif resp.status_code == 404:
-            self.warn(
-                "Avoid having broken links in your sitemap or website: \
-                {0}".format(self.url))
+        # site wide analysis
+        # self._analyze_crawlers(soup)
+        # self._analyze_mobile(soup)
+        # self._analyze_analytics(soup)
 
         # return the rendered results
         return self._render()
@@ -176,7 +168,7 @@ class Webpage(object):
         Analyze URL Structure
         """
 
-        parsed_url = urlparse.urlparse(self.url)
+        parsed_url = parse.urlparse(self.url)
         path = parsed_url.path.split("/")
 
         # Avoid using lengthy URLs with unnecessary parameters and session IDs
@@ -430,22 +422,9 @@ class Webpage(object):
                 u"The average word count for top-ranking content is 1,140 - 1,285 words.  \
                 You have {0} words.".format(count))
         else:
-            self.achieved(
+            self.earned(
                 u"You have provided great comprehensive coverage of your \
                 topic with {0} words.".format(count))
-
-    def _analyze_crawlers(self, doc):
-        # robots.txt present
-        resp = requests.get(self.url + "/robots.txt")
-        if resp.ok:
-            self.achieved(
-                u"robots.txt detected.  This helps search engines navigate pages \
-                that should be indexed")
-        else:
-            self.warn(
-                u"robots.txt is missing.  \
-                A 'robots.txt' file tells search engines whether they \
-                can access and therefore crawl parts of your site")
 
     def _analyze_mobile(self, doc):
         pass
