@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup as Soup
 import requests
 from six.moves.urllib import parse
 
+
 class Spider(object):
     report = {"pages": []}
 

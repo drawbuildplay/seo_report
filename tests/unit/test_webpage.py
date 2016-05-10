@@ -13,7 +13,6 @@ class WebpageTests(testtools.TestCase):
 
         self.titles = {}
         self.descriptions = {}
-        pass
 
     def soup_file(self, html):
         soup = bs4.BeautifulSoup(html, "html.parser")

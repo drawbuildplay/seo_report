@@ -21,7 +21,7 @@ class WebsiteTests(testtools.TestCase):
         self.assertEqual(wp.pages_to_crawl[0], self.site_url)
 
     @ddt.file_data("data_sitemap.json")
-    @mock.patch('website.requests.get')
+    @mock.patch('seo_report.website.requests.get')
     def test_init_sitemap(self, content, mock_requests):
         sitemap_url = "/sitemap.xml"
 
@@ -41,7 +41,7 @@ class WebsiteTests(testtools.TestCase):
         self.assertEqual(len(locations), 2)
 
     @ddt.file_data("data_webpage.json")
-    @mock.patch('website.requests.get')
+    @mock.patch('seo_report.website.requests.get')
     def test_crawl(self, data, mock_requests):
         wp = website.Spider(self.site_url, None)
         wp._analyze_crawlers = mock.MagicMock(name="_analyze_crawlers")
@@ -51,7 +51,7 @@ class WebsiteTests(testtools.TestCase):
 
         mock_requests.return_value.status_code = int(resp_code)
         mock_requests.return_value.content = content
-        report = wp.crawl()
+        wp.crawl()
 
         if int(resp_code) == 404:
             self.assertTrue(any(issue.startswith('Avoid having broken links')
@@ -60,7 +60,7 @@ class WebsiteTests(testtools.TestCase):
             self.assertEqual(len(wp.issues), 0)
 
     @ddt.data("200", "404")
-    @mock.patch('website.requests.get')
+    @mock.patch('seo_report.website.requests.get')
     def test_analyze_crawlers(self, resp_code, mock_requests):
         mock_requests.return_value.status_code = int(resp_code)
 
