@@ -18,31 +18,38 @@ class WebpageTests(testtools.TestCase):
         soup = bs4.BeautifulSoup(html, "html.parser")
         return soup
 
-    @ddt.file_data('data_title_positive.json')
-    def test_analyze_title_positive(self, html):
+    @ddt.file_data('data_html_positive.json')
+    def test_analyze_positive(self, data):
+        html = data[0]
+        expected_achievement = data[1]
+
         self.wp = webpage.Webpage(
             "url.com", html, self.titles, self.descriptions)
-        doc = self.soup_file(html)
-        self.wp._analyze_title(doc)
-
-        # nothing should be wrong with this title
-        self.assertEqual(len(self.wp.issues), 0)
+        self.wp.report()
 
         # title should have achieved the following
-        self.assertTrue("Title is a great length" in self.wp.achieved)
-        self.assertTrue("Title is informative" in self.wp.achieved)
-        self.assertTrue("This page has a unique title tag" in self.wp.achieved)
-        self.assertEqual(len(self.wp.achieved), 3)
+        self.assertTrue(any(earned.startswith(expected_achievement)
+                            for earned in self.wp.achieved),
+                        "{0} not found".format(expected_achievement))
 
-        # title should be added to the list of all titles
-        self.assertTrue(self.wp.title in self.titles)
+    @ddt.file_data('data_html_negative.json')
+    def test_analyze_negative(self, data):
+        html = data[0]
+        expected_error = data[1]
 
-    @ddt.file_data('data_title_negative.json')
-    def test_analyze_title_negative(self, html):
         self.wp = webpage.Webpage(
             "url.com", html, self.titles, self.descriptions)
-        doc = self.soup_file(html)
-        self.wp._analyze_title(doc)
 
-        # one thing should be wrong with this title
-        self.assertEqual(len(self.wp.issues), 1)
+        self.wp.report()
+        self.assertTrue(any(issue.startswith(expected_error)
+                            for issue in self.wp.issues),
+                        "{0} not found in issues".format(expected_error))
+
+    def test_analyze_url(self):
+        pass
+
+    def test_analyze_duplicate_titles(self):
+        pass
+
+    def test_analyze_duplicate_descriptions(self):
+        pass

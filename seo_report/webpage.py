@@ -61,10 +61,9 @@ class Webpage(object):
         """
         Validate the title
         """
+        self.title = t = ""
         if doc.title:
             self.title = t = doc.title.text
-        else:
-            self.title = t = ""
 
         # Avoid using extremely lengthy titles that are unhelpful to users
         length = len(t)
@@ -110,10 +109,11 @@ class Webpage(object):
         """
         Validate the description
         """
-        d = ''
         desc = doc.findAll('meta', attrs={'name': 'description'})
+
+        self.description = d = ""
         if len(desc) > 0:
-            self.description = d = desc[0].get('content')
+            self.description = d = desc[0].get('content', '')
 
         # calculate the length of the description once
         length = len(d)
@@ -172,8 +172,9 @@ class Webpage(object):
         path = parsed_url.path.split("/")
 
         # Avoid using lengthy URLs with unnecessary parameters and session IDs
-        if len(parsed_url.path) > 100:
-            self.warn(u"Avoid using length URLs")
+        if len(self.url) > 100:
+            self.warn(
+                u"Avoid using URLs with unnecessary parameters and IDs")
 
         # Avoid choosing generic page names like "page1.html"
         if any(vague_words in self.url.lower() for vague_words in ['page']):
@@ -258,7 +259,7 @@ class Webpage(object):
         anchors = doc.find_all('a', href=True)
 
         for tag in anchors:
-            tag_href = tag['href'].encode('utf-8')
+            tag_href = tag['href']
             tag_text = tag.text.lower().strip()
 
             image_link = tag.find('img')
@@ -277,7 +278,7 @@ class Webpage(object):
                     self.warn(
                         'Anchor missing title tag or text: \
                         {0}'.format(tag_href))
-                elif len(tag_text) < 3:
+                elif len(tag_text) <= 3:
                     self.warn(
                         'Anchor text too short (less than 3 characters): \
                         {0}'.format(tag_text))
@@ -294,6 +295,12 @@ class Webpage(object):
                         'Anchor text contains generic text: \
                         {0}'.format(tag_text))
 
+            # Avoid using lengthy URLs with unnecessary parameters and session
+            # IDs
+            if len(tag_href) > 100:
+                self.warn(
+                    u"Avoid using lengthy URLs with unnecessary parameters")
+
             # Avoid using text that is off-topic or has no relation to the
             # content of the page linked to
 
@@ -305,7 +312,7 @@ class Webpage(object):
 
             # Avoid comment spam to external websites
             if self.url not in tag_href:
-                if 'rel' in tag and "nofollow" not in tag['rel']:
+                if 'rel' not in tag or "nofollow" not in tag['rel']:
                     self.warn(
                         'Avoid passing your reputation to non-relevant websites: \
                         {0}'.format(tag_href))
