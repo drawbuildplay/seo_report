@@ -3,7 +3,7 @@ import bs4
 import re
 from six.moves.urllib import parse
 
-from stop_words import ENGLISH_STOP_WORDS
+from seo_report.stop_words import ENGLISH_STOP_WORDS
 
 TOKEN_REGEX = re.compile(r'(?u)\b\w\w+\b')
 
@@ -521,7 +521,7 @@ class Webpage(object):
             else:
                 grouped_list[word] = 1
 
-        grouped_list = sorted(grouped_list.iteritems(),
+        grouped_list = sorted(grouped_list.items(),
                               key=lambda x: x[1], reverse=True)
         return grouped_list
 

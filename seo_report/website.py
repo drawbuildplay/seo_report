@@ -1,4 +1,4 @@
-import webpage
+from seo_report import webpage
 
 from bs4 import BeautifulSoup as Soup
 

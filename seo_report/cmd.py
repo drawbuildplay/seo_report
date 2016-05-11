@@ -1,7 +1,7 @@
 import json
 import sys
 
-import website
+from seo_report import website
 
 
 def main():
