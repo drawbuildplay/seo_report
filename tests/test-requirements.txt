@@ -1,7 +1,9 @@
 coverage
+ddt
 flake8
-pep8
 mock
 nose
+pep8
 python-coveralls
+testtools
 tox
