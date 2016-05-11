@@ -15,7 +15,7 @@ Usage
 -----
 
 ```
-pip install -e .
+python setup.py install
 seoreport http://www.domain.com /sitemap.xml
 ```
 

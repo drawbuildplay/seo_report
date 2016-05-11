@@ -6,7 +6,8 @@ pip_requires = os.path.join(os.getcwd(), 'requirements.txt')
 
 REQUIRES=[
     'BeautifulSoup4',
-    'requests'
+    'requests',
+    'six'
 ]
 
 setup(
