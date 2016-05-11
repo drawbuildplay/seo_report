@@ -1,6 +1,5 @@
 import argparse
 import json
-import sys
 
 from seo_report import website
 
@@ -36,7 +35,7 @@ def main():
     args = parser.parse_args()
     report = analyze(args.domain, args.domain + args.sitemap)
 
-    print (report)
+    print(report)
 
 if __name__ == "__main__":
     main()
