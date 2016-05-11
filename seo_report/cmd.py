@@ -1,30 +1,41 @@
+import argparse
 import json
-import sys
 
 from seo_report import website
 
 
+def create_parser():
+    parser = argparse.ArgumentParser(
+        description='Analyze and report on the Search Experience of a website.'
+    )
+
+    parser.add_argument(
+        '-d', '--domain', type=str, required=True,
+        help='Website domain to analyze'
+    )
+
+    parser.add_argument(
+        '-s', '--sitemap', type=str, required=False,
+        default="/sitemap.xml",
+        help='Sitemap.xml file to use'
+    )
+
+    return parser
+
+
+def analyze(domain, sitemap):
+    spider = website.Spider(domain, sitemap)
+    report = spider.crawl()
+
+    return (json.dumps(report, indent=4, separators=(',', ': ')))
+
+
 def main():
-    if len(sys.argv) == 2:
-        site_domain = sys.argv[1]
+    parser = create_parser()
+    args = parser.parse_args()
+    report = analyze(args.domain, args.domain + args.sitemap)
 
-        spider = website.Spider(site_domain)
-        report = spider.crawl()
-
-        print(json.dumps(report, indent=4, separators=(',', ': ')))
-
-    elif len(sys.argv) == 3:
-        site_domain = sys.argv[1]
-        site_map = site_domain + sys.argv[2]
-
-        spider = website.Spider(site_domain, site_map)
-        report = spider.crawl()
-
-        print(json.dumps(report, indent=4, separators=(',', ': ')))
-
-    else:
-        print("Usage: seoreport http://www.domain.com [/sitemap.xml]")
-        exit
+    print(report)
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

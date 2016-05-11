@@ -5,7 +5,7 @@ SEO Report
 [![Build Status](https://travis-ci.org/drawbuildplay/seo_report.svg?branch=master)](https://travis-ci.org/drawbuildplay/seo_report)
 [![Requirements Status](https://requires.io/github/drawbuildplay/seo_report/requirements.svg?branch=master)](https://requires.io/github/drawbuildplay/seo_report/requirements/?branch=master)
 
-Scan your website for On Page SEO Optimization issues based on 
+Scan your website for On Page Searcb Experience Optimization issues based on 
 the SEO guidelines from Google's SEO Starter Guide:
         
 http://static.googleusercontent.com/media/www.google.com/en//webmasters/docs/search-engine-optimization-starter-guide.pdf
@@ -16,12 +16,12 @@ Usage
 
 ```
 python setup.py install
-seoreport http://www.domain.com /sitemap.xml
+seoreport -d http://www.domain.com
 ```
 
 Testing
 -------
 ```
 pip install -r tests/test-requirements.txt
-nosetests
+nosetests --with-coverage
 ```
