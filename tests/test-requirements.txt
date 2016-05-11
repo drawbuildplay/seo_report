@@ -1,6 +1,7 @@
 coverage
 ddt
 flake8
+jsonschema
 mock
 nose
 pep8

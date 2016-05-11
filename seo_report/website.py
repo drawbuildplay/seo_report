@@ -70,7 +70,6 @@ class Spider(object):
         self.achieved.append(message)
 
     def crawl(self):
-
         # site wide checks
         self._analyze_crawlers()
 
