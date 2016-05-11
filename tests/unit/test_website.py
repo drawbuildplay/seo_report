@@ -1,7 +1,10 @@
 import ddt
 import mock
+import requests
 import testtools
 import uuid
+
+from bs4 import BeautifulSoup as Soup
 
 from seo_report import website
 
@@ -20,25 +23,40 @@ class WebsiteTests(testtools.TestCase):
         self.assertEqual(len(wp.pages_to_crawl), 1)
         self.assertEqual(wp.pages_to_crawl[0], self.site_url)
 
-    @ddt.file_data("data_sitemap.json")
+    @ddt.file_data("data_sitemap_positive.json")
     @mock.patch('seo_report.website.requests.get')
-    def test_init_sitemap(self, content, mock_requests):
+    def test_init_sitemap_positive(self, sitemap_content, mock_requests):
         sitemap_url = "/sitemap.xml"
 
-        mock_requests.return_value.status_code = 200
-        mock_requests.return_value.content = content
+        mock_requests.return_value.status_code = requests.codes.ok
+        mock_requests.return_value.content = sitemap_content
 
         wp = website.Spider(self.site_url, self.site_url + sitemap_url)
 
         self.assertTrue(self.site_url in wp.pages_to_crawl)
 
-    @ddt.file_data("data_sitemap.json")
+    @ddt.file_data("data_sitemap_negative.json")
+    @mock.patch('seo_report.website.requests.get')
+    def test_init_sitemap_negative(self, sitemap_content, mock_requests):
+        sitemap_url = "/sitemap.xml"
+
+        mock_requests.return_value.status_code = requests.codes.not_found
+        mock_requests.return_value.content = sitemap_content
+
+        wp = website.Spider(self.site_url, self.site_url + sitemap_url)
+
+        self.assertTrue(self.site_url in wp.pages_to_crawl)
+
+    @ddt.file_data("data_sitemap_positive.json")
     def test_parse_sitemap(self, sitemap_content):
         wp = website.Spider(self.site_url, None)
 
         locations = wp._parse_sitemap(sitemap_content)
 
-        self.assertEqual(len(locations), 2)
+        soup = Soup(sitemap_content, "html.parser")
+        urls = soup.findAll('url')
+
+        self.assertEqual(len(locations), len(urls))
 
     @ddt.file_data("data_webpage.json")
     @mock.patch('seo_report.website.requests.get')
@@ -53,13 +71,17 @@ class WebsiteTests(testtools.TestCase):
         mock_requests.return_value.content = content
         wp.crawl()
 
-        if int(resp_code) == 404:
+        if int(resp_code) == requests.codes.ok:
+            self.assertEqual(len(wp.issues), 0)
+
+        elif int(resp_code) == requests.codes.not_found:
             self.assertTrue(any(issue.startswith('Avoid having broken links')
                                 for issue in wp.issues))
         else:
-            self.assertEqual(len(wp.issues), 0)
+            self.assertTrue(any(issue.startswith('Unknown response code')
+                                for issue in wp.issues))
 
-    @ddt.data("200", "404")
+    @ddt.data("200", "404", "500")
     @mock.patch('seo_report.website.requests.get')
     def test_analyze_crawlers(self, resp_code, mock_requests):
         mock_requests.return_value.status_code = int(resp_code)
@@ -67,7 +89,7 @@ class WebsiteTests(testtools.TestCase):
         wp = website.Spider(self.site_url, None)
         wp._analyze_crawlers()
 
-        if int(resp_code) == 200:
+        if int(resp_code) == requests.codes.ok:
             self.assertTrue(any(earned.startswith('robots.txt detected.')
                                 for earned in wp.achieved))
         else:

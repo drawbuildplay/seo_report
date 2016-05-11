@@ -25,8 +25,9 @@ class Spider(object):
             # add all locations in the sitemap to the pages_to_crawl table
             locations = []
             resp = requests.get(sitemap)
-            if resp.ok:
+            if resp.status_code == requests.codes.ok:
                 locations = self._parse_sitemap(resp.content)
+
             self.pages_to_crawl.append(site)
             self.pages_to_crawl.extend(locations)
         else:
@@ -36,7 +37,7 @@ class Spider(object):
         '''
         Parse the Sitemap for Locations
         '''
-        output = []
+        locations = []
 
         soup = Soup(sitemap, "html.parser")
         urls = soup.findAll('url')
@@ -45,9 +46,9 @@ class Spider(object):
         if len(urls) > 0:
             for u in urls:
                 loc = u.find('loc').string
-                output.append(loc)
+                locations.append(loc)
 
-        return output
+        return locations
 
     def _analyze_crawlers(self):
         # robots.txt present
@@ -77,7 +78,7 @@ class Spider(object):
         for page_url in self.pages_to_crawl:
             resp = requests.get(page_url)
 
-            if resp.status_code == 200:
+            if resp.status_code == requests.codes.ok:
                 html = webpage.Webpage(
                     page_url, resp.content, self.titles, self.descriptions)
 
@@ -86,7 +87,7 @@ class Spider(object):
 
                 # mark the page as crawled
                 self.pages_crawled.append(page_url.strip().lower())
-            elif resp.status_code == 404:
+            elif resp.status_code == requests.codes.not_found:
                 self.warn(
                     "Avoid having broken links in your sitemap or website: \
                     {0}".format(page_url))
