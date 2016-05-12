@@ -1,0 +1,9 @@
+{
+    "title_good_length": ["<html><head><title>This is a good length title that is well optimized for SEO</title></head></html>", "Title is a great length"],
+    "title_informative": ["<html><head><title>This is a good length title that is well optimized for SEO</title></head></html>", "Title is a great length"],
+    "title_unique": ["<html><head><title>This is a good length title that is well optimized for SEO</title></head></html>", "This page has a unique title tag"],
+    "description_good": ["<html><head><meta name='description' content='This is considered to be a good descriptive description about your page.  You want to target about 140-200 characters to tell your users about your page' /></head></html>", "Descriptions are important as Google"]
+}
+
+
+
