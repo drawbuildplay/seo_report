@@ -34,7 +34,7 @@ class WebpageTests(testtools.TestCase):
         # title should have achieved the following
         self.assertTrue(any(earned.startswith(expected_achievement)
                             for earned in self.wp.achieved),
-                        "{0} not found {1}".format(expected_achievement))
+                        "{0} not found".format(expected_achievement))
 
     @ddt.file_data('data_html_negative.json')
     def test_analyze_negative(self, data):
@@ -50,7 +50,7 @@ class WebpageTests(testtools.TestCase):
         self.wp.report()
         self.assertTrue(any(issue.startswith(expected_error)
                             for issue in self.wp.issues),
-                        "{0} not found in issues {1}".format(expected_error))
+                        "{0} not found in issues".format(expected_error))
 
     @ddt.file_data('data_html_negative_url.json')
     def test_analyze_negative_url(self, data):
@@ -64,7 +64,7 @@ class WebpageTests(testtools.TestCase):
         self.wp.report()
         self.assertTrue(any(issue.startswith(expected_error)
                             for issue in self.wp.issues),
-                        "{0} not found in issues {1}".format(expected_error))
+                        "{0} not found in issues".format(expected_error))
 
     def test_analyze_duplicate_titles(self):
         pass
