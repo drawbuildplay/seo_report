@@ -1,0 +1,8 @@
+{
+    "url_lengthy": ["http://www.amazon.com/gp/product/B0007TJ5OG/102-8372974-4064145?v=glance&n=502394&m=ATVPDKIKX0DER&n=3031001&s=photo&v=glance'", "Avoid using URLs with unnecessary parameters and IDs"],
+    "url_vague": ["http://www.domain.com/page1.html", "Avoid choosing generic page name"],
+    "url_keyword_stuffed": ["http://www.domain.com/baseball-cards-baseball-cards-baseballcards.htm", "Avoid keyword stuffing in the url"]
+}
+
+
+

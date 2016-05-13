@@ -63,6 +63,13 @@ class Spider(object):
                 A 'robots.txt' file tells search engines whether they \
                 can access and therefore crawl parts of your site")
 
+    def _analyze_mobile(self):
+        pass
+
+    def _analyze_analytics(self):
+        # Use Google Analytics or Omniture etc
+        pass
+
     def warn(self, message):
         self.issues.append(message)
 
@@ -72,6 +79,8 @@ class Spider(object):
     def crawl(self):
         # site wide checks
         self._analyze_crawlers()
+        self._analyze_mobile()
+        self._analyze_analytics()
 
         # iterate over individual pages to crawl
         for page_url in self.pages_to_crawl:
