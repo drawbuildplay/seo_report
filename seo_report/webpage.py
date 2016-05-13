@@ -49,11 +49,6 @@ class Webpage(object):
         self._analyze_pagespeed(soup)
         self._analyze_sentiment(soup)
 
-        # site wide analysis
-        # self._analyze_crawlers(soup)
-        # self._analyze_mobile(soup)
-        # self._analyze_analytics(soup)
-
         # return the rendered results
         return self._render()
 
@@ -184,7 +179,7 @@ class Webpage(object):
         # like "baseball-cards-baseball-cards-baseballcards.htm"
         url_words = self.grouped(self.tokenize(path[-1]))
         for word, count in url_words:
-            if count > 2:
+            if count >= 2:
                 self.warn(
                     u"Avoid keyword stuffing in the url: {0}".format(self.url))
 
@@ -210,6 +205,9 @@ class Webpage(object):
                 self.warn("Only one version of a URL (Canonical URL) \
                 should be used to reach a document: {0}".format(
                     canonical_url))
+            else:
+                self.earned(
+                    "Using canonical URLs helps avoid duplicate content.")
 
         # Avoid using odd capitalization of URLs
         if any(x.isupper() for x in self.url):
@@ -299,7 +297,7 @@ class Webpage(object):
             # IDs
             if len(tag_href) > 100:
                 self.warn(
-                    u"Avoid using lengthy URLs with unnecessary parameters")
+                    u"Avoid using lengthy links with unnecessary parameters")
 
             # Avoid using text that is off-topic or has no relation to the
             # content of the page linked to
@@ -324,50 +322,49 @@ class Webpage(object):
         images = doc.find_all('img')
 
         for image in images:
-            src = ''
-            if 'src' in image:
-                src = image['src']
-            elif 'data-src' in image:
-                src = image['data-src']
+            src = image.get('src', image.get('data-src', ''))
+
+            if len(src) == 0:
+                self.warn("Image missing src tag: {0}".format(image))
             else:
-                src = image
+                if len(image.get('alt', '')) == 0:
+                    self.warn('Image missing alt tag: {0}'.format(src))
 
-            if len(image.get('alt', '')) == 0:
-                self.warn('Image missing alt tag: {0}'.format(src))
+                # Avoid using generic filenames like
+                # "image1.jpg", "pic.gif", "1.jpg" when possible.
+                # Some sites with thousands of images might consider
+                # automating the naming of images
+                # TODO
 
-            # Avoid using generic filenames like
-            # "image1.jpg", "pic.gif", "1.jpg" when possible.
-            # Some sites with thousands of images might consider automating the
-            # naming of images
-            # TODO
+                # Avoid writing extremely lengthy filenames
+                if len(src) > 15:
+                    self.warn(
+                        "Avoid writing lengthy filenames: {0}".format(src))
 
-            # Avoid writing extremely lengthy filenames
-            if len(src) > 15:
-                self.warn(
-                    "Avoid writing lengthy filenames: {0}".format(src))
+                # Avoid writing excessively long alt text that would be
+                # considered spammy
+                if len(image.get('alt', '')) > 40:
+                    self.warn("Avoid writing excessively long alt text \
+                            that would be considered spammy: {0}".format(
+                        image.get('alt', '')))
 
-            # Avoid writing excessively long alt text that would be considered
-            # spammy
-            if len(image.get('alt', '')) > 40:
-                self.warn("Avoid writing excessively long alt text \
-                           that would be considered spammy: {0}".format(
-                    image.get('alt', '')))
-
-            # Avoid using only image links for your site's navigation
-            # TODO
+                # Avoid using only image links for your site's navigation
+                # TODO
 
     def _analyze_headings(self, doc):
         """
         Make sure each page has at least one header tag
         """
-        htags = doc.find_all('h1')
+        h1tags = doc.find_all('h1')
 
         self.headers = []
-        for h in htags:
+        for h in h1tags:
             self.headers.append(h.text)
 
-        if len(htags) == 0:
+        if len(h1tags) == 0:
             self.warn('Each page should have at least one h1 tag')
+        else:
+            self.earned('Page contains an H1 Heading')
 
         # Avoid placing text in heading tags that wouldn't be helpful
         # in defining the structure of the page
@@ -433,20 +430,11 @@ class Webpage(object):
                 u"You have provided great comprehensive coverage of your \
                 topic with {0} words.".format(count))
 
-    def _analyze_mobile(self, doc):
-        pass
-
     def _analyze_backlinks(self, doc):
         pass
 
     def _analyze_social(self, doc):
-
         # Facebook, Twitter, Pinterest, GooglePlus, Instagram
-        pass
-
-    def _analyze_analytics(self, doc):
-        # Use Google Analytics or Omniture etc
-
         pass
 
     def _analyze_pagespeed(self, doc):
