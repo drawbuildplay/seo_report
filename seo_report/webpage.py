@@ -311,14 +311,16 @@ class Webpage(object):
                     {0}'.format(tag_text))
 
             # Avoid comment spam to external websites
-            if self.url not in tag_href:
-                # if 'rel' not in tag or "nofollow" not in tag['rel']:
-                if tag.get('rel') is None or 'nofollow' not in tag.get('rel'):
-                    self.warn(
-                        'Avoid passing your reputation to nonrelevant websites: \
-                        {0}'.format(tag_href))
-                else:
-                    self.earned('Good use of nofollow to nonrelevant websites')
+            if len(parse.urlparse(tag_href).netloc) > 0:
+                if self.url not in tag_href:
+                    if tag.get('rel') is None \
+                       or 'nofollow' not in tag.get('rel'):
+                        self.warn(
+                            'Avoid passing your reputation to nonrelevant websites: \
+                            {0}'.format(tag_href))
+                    else:
+                        self.earned(
+                            'Good use of nofollow to nonrelevant websites')
 
     def _analyze_images(self, doc):
         """
