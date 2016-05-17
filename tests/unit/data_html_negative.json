@@ -18,7 +18,7 @@
     "anchor_tag_text_too_short": ["<html><a href='404.html'>foo</a></html>", "Anchor text too short"],
     "anchor_tag_text_too_long": ["<html><a href='404.html'>Click here if you want to see something really cool.  We will do a bunch of magic and you may get spammed.</a></html>", "Anchor text too long"],
     "anchor_tag_text_equals_href": ["<html><a href='404.html'>404.html</a></html>", "Avoid using the page URL as the anchor text"],
-    "anchor_tag_external_href": ["<html><a href='www.externalsite.com'>Go External</a></html>", "Avoid passing your reputation to nonrelevant websites"],
+    "anchor_tag_external_href": ["<html><a href='http://www.externalsite.com'>Go External</a></html>", "Avoid passing your reputation to nonrelevant websites"],
     "image_link_no_alt_tag": ["<html><img><a href='404.html'><img/></a></html></html>", "Image link missing Alt tag"],
     "image_link_empty_alt_tag": ["<html><a href='404.html'><img alt=''/></a></html>", "Image link missing Alt tag"],
     "h1_missing": ["<html><h2>This is a second level heading</h2></html>", "Each page should have at least one h1 tag"],
