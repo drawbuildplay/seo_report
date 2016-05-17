@@ -32,9 +32,10 @@ class WebpageTests(testtools.TestCase):
         self.wp.report()
 
         # title should have achieved the following
-        self.assertTrue(any(earned.startswith(expected_achievement)
-                            for earned in self.wp.achieved),
-                        "{0} not found".format(expected_achievement))
+        if expected_achievement != "":
+            self.assertTrue(any(earned.startswith(expected_achievement)
+                                for earned in self.wp.achieved),
+                            "{0} not found".format(expected_achievement))
 
     @ddt.file_data('data_html_negative.json')
     def test_analyze_negative(self, data):
@@ -66,10 +67,6 @@ class WebpageTests(testtools.TestCase):
                             for issue in self.wp.issues),
                         "{0} not found in issues".format(expected_error))
 
-    def test_analyze_duplicate_titles(self):
-        pass
-
-    def test_analyze_duplicate_descriptions(self):
         pass
 
     @ddt.file_data('data_visible_tags.json')
@@ -86,3 +83,27 @@ class WebpageTests(testtools.TestCase):
         for tag in elements:
             result = self.wp.visible_tags(tag)
             self.assertEqual(result, data[1])
+
+    @ddt.file_data('data_duplicates_negative.json')
+    def test_analyze_duplicates_negative(self, page):
+        html = page[0]
+        expected_error = page[1]
+
+        report = {"pages": []}
+        for i in range(0, 2):
+            self.wp = webpage.Webpage(
+                "https://www.drawbuildplay.com/page{0}.html".format(i),
+                html,
+                self.titles,
+                self.descriptions)
+
+            page_report = self.wp.report()
+            report['pages'].append(page_report)
+
+        # warn about duplicate information
+        self.assertTrue(any(issue.startswith(expected_error)
+                            for p in report['pages'] for issue in p['issues']),
+                        "{0} not found in issues {1} {2}".format(
+                            expected_error,
+                            self.titles,
+                            self.descriptions))
