@@ -7,6 +7,8 @@ import uuid
 from bs4 import BeautifulSoup as Soup
 
 from seo_report import website
+from seo_report.warnings import WARNINGS
+from seo_report.warnings import BADGES
 
 
 @ddt.ddt
@@ -75,11 +77,13 @@ class WebsiteTests(testtools.TestCase):
             self.assertEqual(len(wp.issues), 0)
 
         elif int(resp_code) == requests.codes.not_found:
-            self.assertTrue(any(issue.startswith('Avoid having broken links')
-                                for issue in wp.issues))
+            self.assertTrue(any(issue["warning"] == WARNINGS["BROKEN_LINK"]
+                                for issue in wp.issues),
+                            "{0} not raised.".format(WARNINGS["BROKEN_LINK"]))
         else:
-            self.assertTrue(any(issue.startswith('Unknown response code')
-                                for issue in wp.issues))
+            self.assertTrue(any(issue["warning"] == WARNINGS["SERVER_ERROR"]
+                                for issue in wp.issues),
+                            "{0} not raised.".format(WARNINGS["SERVER_ERROR"]))
 
     @ddt.data("200", "404", "500")
     @mock.patch('seo_report.website.requests.get')
@@ -90,8 +94,10 @@ class WebsiteTests(testtools.TestCase):
         wp._analyze_crawlers()
 
         if int(resp_code) == requests.codes.ok:
-            self.assertTrue(any(earned.startswith('robots.txt detected.')
-                                for earned in wp.achieved))
+            self.assertTrue(any(earned["achievement"] == BADGES["ROBOTS.TXT"]
+                                for earned in wp.achieved),
+                            "{0} not earned".format(BADGES["ROBOTS.TXT"]))
         else:
-            self.assertTrue(any(issue.startswith('robots.txt is missing.')
-                                for issue in wp.issues))
+            self.assertTrue(any(issue["warning"] == WARNINGS["ROBOTS.TXT"]
+                                for issue in wp.issues),
+                            "{0} not raised.".format(WARNINGS["ROBOTS.TXT"]))

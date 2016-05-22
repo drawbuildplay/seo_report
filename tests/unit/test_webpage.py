@@ -55,7 +55,7 @@ class WebpageTests(testtools.TestCase):
                             for issue in self.wp.issues),
                         "{0} not raised.".format(WARNINGS[expected_error]))
 
-    @ddt.file_data('data_html_negative_url.json')
+    @ddt.file_data('data_url_negative.json')
     def test_analyze_negative_url(self, data):
         url = data[0]
         expected_error = data[1]
@@ -69,7 +69,20 @@ class WebpageTests(testtools.TestCase):
                             for issue in self.wp.issues),
                         "{0} not raised.".format(WARNINGS[expected_error]))
 
-        pass
+    @ddt.file_data('data_url_positive.json')
+    def test_analyze_positive_url(self, data):
+        url = data[0]
+        badge = data[1]
+        html = ""
+
+        self.wp = webpage.Webpage(
+            url, html, self.titles, self.descriptions)
+
+        self.wp.report()
+        if badge != "":
+            self.assertTrue(any(earned["achievement"] == BADGES[badge]
+                                for earned in self.wp.achieved),
+                            "{0} not earned".format(BADGES[badge]))
 
     @ddt.file_data('data_visible_tags.json')
     def test_visible_tags(self, data):

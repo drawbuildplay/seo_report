@@ -8,6 +8,13 @@ from seo_report.warnings import BADGES
 from seo_report.warnings import WARNINGS
 
 TOKEN_REGEX = re.compile(r'(?u)\b\w\w+\b')
+SOCIAL_WEBSITES = [
+    "www.facebook.com",
+    "twitter.com",
+    "plus.google.com",
+    "www.instagram.com",
+    "www.pinterest.com"
+]
 
 
 class Webpage(object):
@@ -20,6 +27,7 @@ class Webpage(object):
 
     def __init__(self, page_url, html, website_titles, website_descriptions):
         self.url = page_url
+        self.netloc = parse.urlparse(page_url).netloc
         self.html = html
         self.title = None
         self.description = None
@@ -133,7 +141,7 @@ class Webpage(object):
                ):
             self.warn(WARNINGS["DESCRIPTION_TOO_GENERIC"], self.description)
         else:
-            self.warn(BADGES["DESCRIPTION_INFORMATIVE"], self.description)
+            self.earned(BADGES["DESCRIPTION_INFORMATIVE"], self.description)
 
         # Avoid filling the description with only keywords
         desc_words = self.grouped(self.tokenize(d))
@@ -263,7 +271,7 @@ class Webpage(object):
                 # short paragraph of text
                 if len(tag.get('title', '')) == 0 and len(tag_text) == 0:
                     self.warn(WARNINGS["ANCHOR_TEXT_MISSING"], tag_href)
-                elif len(tag_text) <= 3:
+                elif len(tag_text) < 3:
                     self.warn(WARNINGS["ANCHOR_TEXT_TOO_SHORT"], tag_text)
                 elif len(tag_text) > 100:
                     self.warn(WARNINGS["ANCHOR_TEXT_TOO_LONG"], tag_text)
@@ -286,12 +294,14 @@ class Webpage(object):
 
             # Avoid comment spam to external websites
             if len(parse.urlparse(tag_href).netloc) > 0:
-                if self.url not in tag_href:
-                    if tag.get('rel') is None \
-                       or 'nofollow' not in tag.get('rel'):
-                        self.warn(WARNINGS["ANCHOR_NO_FOLLOW"], tag_href)
-                    else:
-                        self.earned(BADGES["ANCHOR_NO_FOLLOW"], tag_href)
+                if self.netloc not in tag_href:
+                    if not(any(social_site in tag_href
+                               for social_site in SOCIAL_WEBSITES)):
+                        if tag.get('rel') is None \
+                                or 'nofollow' not in tag.get('rel'):
+                            self.warn(WARNINGS["ANCHOR_NO_FOLLOW"], tag_href)
+                        else:
+                            self.earned(BADGES["ANCHOR_NO_FOLLOW"], tag_href)
 
     def _analyze_images(self, doc):
         """
@@ -314,9 +324,12 @@ class Webpage(object):
                 # automating the naming of images
                 # TODO
 
-                # Avoid writing extremely lengthy filenames
-                if len(src) > 15:
-                    self.warn(WARNINGS["IMAGE_SRC_TOO_LONG"], src)
+                # Avoid writing extremely lengthy filenames for
+                # relative images on the site
+                if len(parse.urlparse(src).netloc) == 0 \
+                   or self.netloc in src:
+                    if len(src) > 15:
+                        self.warn(WARNINGS["IMAGE_SRC_TOO_LONG"], src)
 
                 # Avoid writing excessively long alt text that would be
                 # considered spammy
@@ -337,7 +350,12 @@ class Webpage(object):
         for h in h1tags:
             self.headers.append(h.text)
 
-        if len(h1tags) == 0:
+            if len(h.text) < 3:
+                self.warn(WARNINGS["H1_TOO_SHORT"], h.text)
+            else:
+                self.earned(BADGES["H1_LENGTH"], h.text)
+
+        if len(h1tags) != 1:
             self.warn(WARNINGS["H1_ONE_PER_PAGE"], self.headers)
         else:
             self.earned(BADGES["H1_ONE_PER_PAGE"], self.headers)

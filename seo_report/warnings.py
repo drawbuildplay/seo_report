@@ -58,22 +58,32 @@ WARNINGS = {
     "ANCHOR_HREF_EQUALS_TEXT":
     u"Avoid using the page URL as the anchor text.",
     "ANCHOR_NO_FOLLOW":
-    u"Avoid passing your reputation to nonrelevant websites.",
+    u"Avoid passing your reputation to low ranking or non relevant websites.",
     "IMAGE_SRC_MISSING":
     u"Image missing src tag.",
     "IMAGE_SRC_TOO_LONG":
-    u"Avoid writing lengthy filenames (more than 15 characters).",
+    u"Avoid using long filenames in links (more than 15 characters).",
     "IMAGE_ALT_MISSING":
     u"Image missing alt tag.",
     "IMAGE_ALT_TOO_LONG":
     u"Avoid writing excessively long alt text that could be spammy.",
     "H1_ONE_PER_PAGE":
-    u"Each page should have at least one h1 tag",
+    u"Each page should have only one h1 tag",
+    "H1_TOO_SHORT":
+    u"Avoid using H1 Tags that are too short (less than 3 characters).",
     "KEYWORDS_META":
     u"The Keywords Metatag should be avoided as they are a spam indicator "
     u"and no longer used by Search Engines.",
     "WORDCOUNT_TOO_SHORT":
-    u"The average word count for top-ranking content is 1,140 - 1,285 words."
+    u"The average word count for top-ranking content is 1,140 - 1,285 words.",
+    "ROBOTS.TXT":
+    u"robots.txt is missing. "
+    u"A 'robots.txt' file tells search engines whether they can "
+    u"access, and therefore crawl parts of your site",
+    "BROKEN_LINK":
+    u"Avoid referencing broken links on your site.",
+    "SERVER_ERROR":
+    u"Avoid referencing pages that error out on your site."
 }
 BADGES = {
     "TITLE_LENGTH":
@@ -98,6 +108,11 @@ BADGES = {
     u"Good use of nofollow to nonrelevant websites.",
     "H1_ONE_PER_PAGE":
     u"Page contains a single H1 Heading",
+    "H1_LENGTH":
+    u"Page contains an H1 with a good length",
     "WORDCOUNT":
-    u"You have provided great comprehensive coverage of your topic."
+    u"You have provided great comprehensive coverage of your topic.",
+    "ROBOTS.TXT":
+    u"Robots.txt file detected.  Robots.txt helps search engines navigate "
+    u"pages that should be indexed"
 }
