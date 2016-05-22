@@ -1,6 +1,7 @@
 import bs4
 
 import re
+import requests
 from six.moves.urllib import parse
 
 from seo_report.stop_words import ENGLISH_STOP_WORDS
@@ -250,6 +251,7 @@ class Webpage(object):
         Analyze Anchor Tags
         """
         anchors = doc.find_all('a', href=True)
+        verified_pages = []
 
         for tag in anchors:
             tag_href = tag['href']
@@ -302,6 +304,19 @@ class Webpage(object):
                             self.warn(WARNINGS["ANCHOR_NO_FOLLOW"], tag_href)
                         else:
                             self.earned(BADGES["ANCHOR_NO_FOLLOW"], tag_href)
+
+            # Avoid linking to broken webpages
+            if not tag_href.startswith("mailto:"):
+                referenced_href = tag_href
+                if len(parse.urlparse(tag_href).netloc) == 0:
+                    referenced_href = parse.urljoin(self.url, tag_href)
+
+                if referenced_href not in verified_pages:
+                    resp = requests.head(referenced_href)
+                    if resp.status_code == requests.codes.not_found:
+                        self.warn(WARNINGS["BROKEN_LINK"], referenced_href)
+
+                verified_pages.append(referenced_href)
 
     def _analyze_images(self, doc):
         """
