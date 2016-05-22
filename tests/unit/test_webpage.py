@@ -3,6 +3,8 @@ import ddt
 import testtools
 
 from seo_report import webpage
+from seo_report.warnings import BADGES
+from seo_report.warnings import WARNINGS
 
 
 @ddt.ddt
@@ -21,7 +23,7 @@ class WebpageTests(testtools.TestCase):
     @ddt.file_data('data_html_positive.json')
     def test_analyze_positive(self, data):
         html = data[0]
-        expected_achievement = data[1]
+        badge = data[1]
 
         self.wp = webpage.Webpage(
             "https://www.drawbuildplay.com",
@@ -32,10 +34,10 @@ class WebpageTests(testtools.TestCase):
         self.wp.report()
 
         # title should have achieved the following
-        if expected_achievement != "":
-            self.assertTrue(any(earned.startswith(expected_achievement)
+        if badge != "":
+            self.assertTrue(any(earned["achievement"] == BADGES[badge]
                                 for earned in self.wp.achieved),
-                            "{0} not found".format(expected_achievement))
+                            "{0} not earned".format(BADGES[badge]))
 
     @ddt.file_data('data_html_negative.json')
     def test_analyze_negative(self, data):
@@ -49,9 +51,9 @@ class WebpageTests(testtools.TestCase):
             self.descriptions)
 
         self.wp.report()
-        self.assertTrue(any(issue.startswith(expected_error)
+        self.assertTrue(any(issue["warning"] == WARNINGS[expected_error]
                             for issue in self.wp.issues),
-                        "{0} not found in issues".format(expected_error))
+                        "{0} not raised.".format(WARNINGS[expected_error]))
 
     @ddt.file_data('data_html_negative_url.json')
     def test_analyze_negative_url(self, data):
@@ -63,9 +65,9 @@ class WebpageTests(testtools.TestCase):
             url, html, self.titles, self.descriptions)
 
         self.wp.report()
-        self.assertTrue(any(issue.startswith(expected_error)
+        self.assertTrue(any(issue["warning"] == WARNINGS[expected_error]
                             for issue in self.wp.issues),
-                        "{0} not found in issues".format(expected_error))
+                        "{0} not raised.".format(WARNINGS[expected_error]))
 
         pass
 
@@ -101,9 +103,9 @@ class WebpageTests(testtools.TestCase):
             report['pages'].append(page_report)
 
         # warn about duplicate information
-        self.assertTrue(any(issue.startswith(expected_error)
+        self.assertTrue(any(issue["warning"] == WARNINGS[expected_error]
                             for p in report['pages'] for issue in p['issues']),
-                        "{0} not found in issues {1} {2}".format(
-                            expected_error,
+                        "{0} not raised. {1} {2}".format(
+                            WARNINGS[expected_error],
                             self.titles,
                             self.descriptions))
