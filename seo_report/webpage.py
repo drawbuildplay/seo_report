@@ -4,6 +4,8 @@ import re
 from six.moves.urllib import parse
 
 from seo_report.stop_words import ENGLISH_STOP_WORDS
+from seo_report.warnings import BADGES
+from seo_report.warnings import WARNINGS
 
 TOKEN_REGEX = re.compile(r'(?u)\b\w\w+\b')
 
@@ -63,28 +65,29 @@ class Webpage(object):
         # Avoid using extremely lengthy titles that are unhelpful to users
         length = len(t)
         if length == 0:
-            self.warn(u'Missing title tag')
+            self.warn(WARNINGS["TITLE_MISSING"], self.title)
             return
         elif length < 10:
-            self.warn(u'Title tag is too short (less than 10 characters)')
+            self.warn(WARNINGS["TITLE_TOO_SHORT"], self.title)
         elif length > 70:
-            self.warn(u'Title tag is too long (more than 70 characters)')
+            self.warn(WARNINGS["TITLE_TOO_LONG"], self.title)
         else:
-            self.earned(u'Title is a great length')
+            self.earned(BADGES["TITLE_LENGTH"], self.title)
 
         # Avoid using default or vague titles like "Untitled" or "New Page 1"
         if any(vague_words in t.lower()
                for vague_words in ['untitled', 'page']):
-            self.warn(u'Title is too vague')
+            self.warn(WARNINGS["TITLE_TOO_GENERIC"], self.title)
         else:
-            self.earned(u'Title is informative')
+            self.earned(BADGES["TITLE_INFORMATIVE"], self.title)
 
         # Avoid stuffing unneeded keywords in your title tags
         title_words = self.grouped(self.tokenize(t))
         for word, count in title_words:
             if count > 3:
                 self.warn(
-                    u"Avoid keyword stuffing in the title: {0}".format(t))
+                    WARNINGS["TITLE_KEYWORD_STUFFED"],
+                    self.title)
 
         # Avoid choosing a title that has no relation to the content on the
         # page
@@ -93,11 +96,12 @@ class Webpage(object):
         # Avoid using a single title tag across all of your site's pages or a
         # large group of pages
         if t in self.website_titles:
-            self.warn(u'Duplicate page title: {0} \
-            previously used at {1}'.format(
-                t, self.website_titles[t]))
+            self.warn(
+                WARNINGS["TITLE_DUPLICATED"],
+                '"{0}" previously used on pages: {1}'.format(
+                    t, self.website_titles[t]))
         else:
-            self.earned(u'This page has a unique title tag')
+            self.earned(BADGES["TITLE_UNIQUE"], self.title)
             self.website_titles[t] = self.url
 
     def _analyze_description(self, doc):
@@ -113,37 +117,30 @@ class Webpage(object):
         # calculate the length of the description once
         length = len(d)
         if length == 0:
-            self.warn(u'Description is missing.')
+            self.warn(WARNINGS["DESCRIPTION_MISSING"])
             return
         elif length < 140:
-            self.warn(
-                u'Description is too short (less than 140 characters): \
-                {0}'.format(d))
+            self.warn(WARNINGS["DESCRIPTION_TOO_SHORT"], self.description)
         elif length > 255:
-            self.warn(
-                u'Description is too long (more than 255 characters): \
-                {0}'.format(d))
+            self.warn(WARNINGS["DESCRIPTION_TOO_LONG"], self.description)
         else:
-            self.earned(
-                u'Descriptions are important as Google \
-                may use them as page snippets.')
+            self.earned(BADGES["DESCRIPTION_LENGTH"], self.description)
 
         # Avoid using generic descriptions like "This is a web page" or "Page
         # about baseball cards"
         if any(vague_words in d.lower()
                for vague_words in ['web page', 'page about']
                ):
-            self.warn(u'Description is too generic')
+            self.warn(WARNINGS["DESCRIPTION_TOO_GENERIC"], self.description)
         else:
-            self.earned(u'Description is informative')
+            self.warn(BADGES["DESCRIPTION_INFORMATIVE"], self.description)
 
         # Avoid filling the description with only keywords
         desc_words = self.grouped(self.tokenize(d))
         for word, count in desc_words:
             if count > 3:
                 self.warn(
-                    u"Avoid keyword stuffing in the description: \
-                    {0}".format(d))
+                    WARNINGS["DESCRIPTION_KEYWORD_STUFFED"], self.description)
 
         # Avoid copying and pasting the entire content
         # of the document into the description meta tag
@@ -152,8 +149,8 @@ class Webpage(object):
         # Avoid using a single description meta tag across all of your site's
         # pages or a large group of pages
         if d in self.website_descriptions:
-            self.warn(u'Duplicate description: \
-                        {0} previously used at: {1}'.format(
+            self.warn(WARNINGS["DESCRIPTION_DUPLICATED"],
+                      '"{0}" previously used on pages: {1}'.format(
                 d, self.website_descriptions[d]))
         else:
             self.website_descriptions[d] = self.url
@@ -168,26 +165,23 @@ class Webpage(object):
 
         # Avoid using lengthy URLs with unnecessary parameters and session IDs
         if len(self.url) > 100:
-            self.warn(
-                u"Avoid using URLs with unnecessary parameters and IDs")
+            self.warn(WARNINGS["URL_TOO_LONG"], self.url)
 
         # Avoid choosing generic page names like "page1.html"
         if any(vague_words in self.url.lower() for vague_words in ['page']):
-            self.warn(u'Avoid choosing generic page names like "page1.html"')
+            self.warn(WARNINGS["URL_TOO_GENERIC"], self.url)
 
         # Avoid using excessive keywords
         # like "baseball-cards-baseball-cards-baseballcards.htm"
         url_words = self.grouped(self.tokenize(path[-1]))
         for word, count in url_words:
             if count >= 2:
-                self.warn(
-                    u"Avoid keyword stuffing in the url: {0}".format(self.url))
+                self.warn(WARNINGS["URL_KEYWORD_STUFFED"], self.url)
 
-        # Avoid having deep nesting of subdirectories like ".../dir1/dir /dir
+        # Avoid having deep nesting of subdirectories like ".../dir1/dir2/dir3
         # /dir4/dir5/dir6/page.html"
         if len(path) > 3:
-            self.warn(u"Avoid deep nesting of subdirectories: {0}".format(
-                parsed_url.path))
+            self.warn(WARNINGS["URL_TOO_DEEP"], self.url)
 
         # Avoid using directory names that have no relation to the content in
         # them
@@ -202,24 +196,17 @@ class Webpage(object):
 
             if canonical_url != self.url:
                 # ignore this page, but ensure the canonical url is in our list
-                self.warn("Only one version of a URL (Canonical URL) \
-                should be used to reach a document: {0}".format(
-                    canonical_url))
+                self.warn(WARNINGS["URL_NOT_CANONICAL"], canonical_url)
             else:
-                self.earned(
-                    "Using canonical URLs helps avoid duplicate content.")
+                self.earned(BADGES["URL_CANONICAL"], self.url)
 
         # Avoid using odd capitalization of URLs
         if any(x.isupper() for x in self.url):
-            self.warn(
-                u'Avoid using uppercase characters in the URL. \
-                Many users expect lower-case URLs and remember them better')
+            self.warn(WARNINGS["URL_CAPITALIZED"], self.url)
         else:
             # Achievement: many users expect lower-case URLs and remember them
             # better
-            self.earned(
-                u'URL is lowercase. \
-                Many users expect lower-case URLs and remember them better')
+            self.earned(BADGES["URL_CORRECTLY_CASED"], self.url)
 
         # Avoid creating complex webs of navigation links, e.g. linking every
         # page on your site to every other page
@@ -265,62 +252,46 @@ class Webpage(object):
             if image_link is not None:
                 # Ensure the image uses an Alt tag
                 if len(image_link.get('alt', '')) == 0:
-                    self.warn(
-                        'Image link missing Alt tag: {0}'.format(tag_href))
+                    self.warn(WARNINGS["IMAGE_LINK_ALT_MISSING"], tag_href)
                 else:
-                    self.earned('Image link contains an alt tag')
+                    self.earned(BADGES["IMAGE_LINK_ALT"],
+                                image_link.get('alt', ''))
 
             else:
                 # Ensure title tags or the text are used in Anchors
                 # Avoid writing long anchor text, such as a lengthy sentence or
                 # short paragraph of text
                 if len(tag.get('title', '')) == 0 and len(tag_text) == 0:
-                    self.warn(
-                        'Anchor missing title tag or text: \
-                        {0}'.format(tag_href))
+                    self.warn(WARNINGS["ANCHOR_TEXT_MISSING"], tag_href)
                 elif len(tag_text) <= 3:
-                    self.warn(
-                        'Anchor text too short (less than 3 characters): \
-                        {0}'.format(tag_text))
-                elif len(tag_text) > 80:
-                    self.warn(
-                        'Anchor text too long (more than 80 characters): \
-                        {0}'.format(tag_text))
+                    self.warn(WARNINGS["ANCHOR_TEXT_TOO_SHORT"], tag_text)
+                elif len(tag_text) > 100:
+                    self.warn(WARNINGS["ANCHOR_TEXT_TOO_LONG"], tag_text)
 
                 # Avoid writing generic anchor text like "page", "article", or
                 # "click here"
                 if any(vague_words in tag_text.lower()
                        for vague_words in ['click here', 'page', 'article']):
-                    self.warn(
-                        'Anchor text contains generic text: \
-                        {0}'.format(tag_text))
+                    self.warn(WARNINGS["ANCHOR_TEXT_TOO_GENERIC"], tag_text)
 
-            # Avoid using lengthy URLs with unnecessary parameters and session
-            # IDs
             if len(tag_href) > 100:
-                self.warn(
-                    u"Avoid using lengthy links with unnecessary parameters")
+                self.warn(WARNINGS["ANCHOR_HREF_TOO_LONG"], tag_href)
 
             # Avoid using text that is off-topic or has no relation to the
             # content of the page linked to
 
             # Avoid using the page's URL as the anchor text in most cases
             if tag_text == tag_href:
-                self.warn(
-                    'Avoid using the page URL as the anchor text: \
-                    {0}'.format(tag_text))
+                self.warn(WARNINGS["ANCHOR_HREF_EQUALS_TEXT"], tag_text)
 
             # Avoid comment spam to external websites
             if len(parse.urlparse(tag_href).netloc) > 0:
                 if self.url not in tag_href:
                     if tag.get('rel') is None \
                        or 'nofollow' not in tag.get('rel'):
-                        self.warn(
-                            'Avoid passing your reputation to nonrelevant websites: \
-                            {0}'.format(tag_href))
+                        self.warn(WARNINGS["ANCHOR_NO_FOLLOW"], tag_href)
                     else:
-                        self.earned(
-                            'Good use of nofollow to nonrelevant websites')
+                        self.earned(BADGES["ANCHOR_NO_FOLLOW"], tag_href)
 
     def _analyze_images(self, doc):
         """
@@ -332,10 +303,10 @@ class Webpage(object):
             src = image.get('src', image.get('data-src', ''))
 
             if len(src) == 0:
-                self.warn("Image missing src tag: {0}".format(image))
+                self.warn(WARNINGS["IMAGE_SRC_MISSING"], image)
             else:
                 if len(image.get('alt', '')) == 0:
-                    self.warn('Image missing alt tag: {0}'.format(src))
+                    self.warn(WARNINGS["IMAGE_ALT_MISSING"], image)
 
                 # Avoid using generic filenames like
                 # "image1.jpg", "pic.gif", "1.jpg" when possible.
@@ -345,15 +316,13 @@ class Webpage(object):
 
                 # Avoid writing extremely lengthy filenames
                 if len(src) > 15:
-                    self.warn(
-                        "Avoid writing lengthy filenames: {0}".format(src))
+                    self.warn(WARNINGS["IMAGE_SRC_TOO_LONG"], src)
 
                 # Avoid writing excessively long alt text that would be
                 # considered spammy
                 if len(image.get('alt', '')) > 40:
-                    self.warn("Avoid writing excessively long alt text \
-                            that would be considered spammy: {0}".format(
-                        image.get('alt', '')))
+                    self.warn(WARNINGS["IMAGE_ALT_TOO_LONG"],
+                              image.get('alt', ''))
 
                 # Avoid using only image links for your site's navigation
                 # TODO
@@ -369,9 +338,9 @@ class Webpage(object):
             self.headers.append(h.text)
 
         if len(h1tags) == 0:
-            self.warn('Each page should have at least one h1 tag')
+            self.warn(WARNINGS["H1_ONE_PER_PAGE"], self.headers)
         else:
-            self.earned('Page contains an H1 Heading')
+            self.earned(BADGES["H1_ONE_PER_PAGE"], self.headers)
 
         # Avoid placing text in heading tags that wouldn't be helpful
         # in defining the structure of the page
@@ -401,10 +370,7 @@ class Webpage(object):
         kw_meta = doc.findAll('meta', attrs={'name': 'keywords'})
 
         if len(kw_meta) > 0:
-            self.warn(
-                'The Keywords Metatag should be avoided as they are a spam \
-                indicator and no longer used by \
-                Search Engines: {0}'.format(kw_meta))
+            self.warn(WARNINGS["KEYWORDS_META"], kw_meta)
 
         # Detect the most popular keywords used on the page
         self.keywords = self._get_keywords(doc)
@@ -429,13 +395,11 @@ class Webpage(object):
             count += freq
 
         if count < 1140:
-            self.warn(
-                u"The average word count for top-ranking content is 1,140 - 1,285 words.  \
-                You have {0} words.".format(count))
+            self.warn(WARNINGS["WORDCOUNT_TOO_SHORT"],
+                      u"You have {0} words.".format(count))
         else:
-            self.earned(
-                u"You have provided great comprehensive coverage of your \
-                topic with {0} words.".format(count))
+            self.earned(BADGES["WORDCOUNT"],
+                        u"You have {0} words.".format(count))
 
     def _analyze_backlinks(self, doc):
         pass
@@ -490,11 +454,21 @@ class Webpage(object):
 
         return result
 
-    def warn(self, message):
-        self.issues.append(message)
+    def warn(self, message, value=None):
+        self.issues.append(
+            {
+                "warning": message,
+                "value": value
+            }
+        )
 
-    def earned(self, message):
-        self.achieved.append(message)
+    def earned(self, message, value=None):
+        self.achieved.append(
+            {
+                "achievement": message,
+                "value": value
+            }
+        )
 
     def visible_tags(self, element):
         non_visible_elements = [
