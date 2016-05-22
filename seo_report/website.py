@@ -1,7 +1,8 @@
 from seo_report import webpage
+from seo_report.warnings import WARNINGS
+from seo_report.warnings import BADGES
 
 from bs4 import BeautifulSoup as Soup
-
 import requests
 from six.moves.urllib import parse
 
@@ -54,14 +55,9 @@ class Spider(object):
         # robots.txt present
         resp = requests.get(self.domain + "/robots.txt")
         if resp.status_code == 200:
-            self.earned(
-                u"robots.txt detected.  This helps search engines navigate pages \
-                that should be indexed")
+            self.earned(BADGES["ROBOTS.TXT"])
         else:
-            self.warn(
-                u"robots.txt is missing.  \
-                A 'robots.txt' file tells search engines whether they \
-                can access and therefore crawl parts of your site")
+            self.warn(WARNINGS["ROBOTS.TXT"])
 
     def _analyze_mobile(self):
         pass
@@ -70,11 +66,21 @@ class Spider(object):
         # Use Google Analytics or Omniture etc
         pass
 
-    def warn(self, message):
-        self.issues.append(message)
+    def warn(self, message, value=None):
+        self.issues.append(
+            {
+                "warning": message,
+                "value": value
+            }
+        )
 
-    def earned(self, message):
-        self.achieved.append(message)
+    def earned(self, message, value=None):
+        self.achieved.append(
+            {
+                "achievement": message,
+                "value": value
+            }
+        )
 
     def crawl(self):
         # site wide checks
@@ -84,6 +90,8 @@ class Spider(object):
 
         # iterate over individual pages to crawl
         for page_url in self.pages_to_crawl:
+            print("Crawled {0} Pages of {1}".format(
+                len(self.pages_crawled), len(self.pages_to_crawl)))
             resp = requests.get(page_url)
 
             if resp.status_code == requests.codes.ok:
@@ -96,12 +104,11 @@ class Spider(object):
                 # mark the page as crawled
                 self.pages_crawled.append(page_url.strip().lower())
             elif resp.status_code == requests.codes.not_found:
-                self.warn(
-                    "Avoid having broken links in your sitemap or website: \
-                    {0}".format(page_url))
+                self.warn(WARNINGS["BROKEN_LINK"], page_url)
             else:
-                self.warn("Unknown response code detected: \
-                {0}: {1}".format(resp.status_code, page_url))
+                self.warn(WARNINGS["SERVER_ERROR"],
+                          "HTTP{0} received for {1}".format(
+                              resp.status_code, page_url))
 
         # aggregate the site wide issues/achievements
         self.report['site'] = {}
