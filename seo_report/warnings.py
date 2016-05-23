@@ -83,7 +83,11 @@ WARNINGS = {
     "BROKEN_LINK":
     u"Avoid referencing broken links on your site.",
     "SERVER_ERROR":
-    u"Avoid referencing pages that error out on your site."
+    u"Avoid referencing pages that error out on your site.",
+    "BLOG_MISSING":
+    u"Blog was not found on this domain. "
+    u"Blogging about your expertise helps build trust and relationships. "
+    u"Ensure your blog exists on this domain to build your domain authority."
 }
 BADGES = {
     "TITLE_LENGTH":
@@ -114,5 +118,8 @@ BADGES = {
     u"You have provided great comprehensive coverage of your topic.",
     "ROBOTS.TXT":
     u"Robots.txt file detected.  Robots.txt helps search engines navigate "
-    u"pages that should be indexed"
+    u"pages that should be indexed.",
+    "BLOG_DETECTED":
+    u"Blog was found on this domain. "
+    u"Blogging about your expertise helps build trust and relationships."
 }

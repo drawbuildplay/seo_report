@@ -54,10 +54,18 @@ class Spider(object):
     def _analyze_crawlers(self):
         # robots.txt present
         resp = requests.get(self.domain + "/robots.txt")
-        if resp.status_code == 200:
+        if resp.status_code == requests.codes.ok:
             self.earned(BADGES["ROBOTS.TXT"])
         else:
             self.warn(WARNINGS["ROBOTS.TXT"])
+
+    def _analyze_blog(self):
+        # does the website have a blog present
+        resp = requests.get(self.domain + "/blog")
+        if resp.status_code == requests.codes.ok:
+            self.earned(BADGES["BLOG_DETECTED"], self.domain + u"/blog")
+        else:
+            self.warn(WARNINGS["BLOG_MISSING"])
 
     def _analyze_mobile(self):
         pass
@@ -87,6 +95,7 @@ class Spider(object):
         self._analyze_crawlers()
         self._analyze_mobile()
         self._analyze_analytics()
+        self._analyze_blog()
 
         # iterate over individual pages to crawl
         for page_url in self.pages_to_crawl:

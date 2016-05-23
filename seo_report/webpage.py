@@ -67,7 +67,7 @@ class Webpage(object):
         """
         Validate the title
         """
-        self.title = t = ""
+        self.title = t = u""
         if doc.title:
             self.title = t = doc.title.text
 
@@ -107,7 +107,7 @@ class Webpage(object):
         if t in self.website_titles:
             self.warn(
                 WARNINGS["TITLE_DUPLICATED"],
-                '"{0}" previously used on pages: {1}'.format(
+                u'"{0}" previously used on pages: {1}'.format(
                     t, self.website_titles[t]))
         else:
             self.earned(BADGES["TITLE_UNIQUE"], self.title)
@@ -119,7 +119,7 @@ class Webpage(object):
         """
         desc = doc.findAll('meta', attrs={'name': 'description'})
 
-        self.description = d = ""
+        self.description = d = u""
         if len(desc) > 0:
             self.description = d = desc[0].get('content', '')
 
@@ -159,7 +159,7 @@ class Webpage(object):
         # pages or a large group of pages
         if d in self.website_descriptions:
             self.warn(WARNINGS["DESCRIPTION_DUPLICATED"],
-                      '"{0}" previously used on pages: {1}'.format(
+                      u'"{0}" previously used on pages: {1}'.format(
                 d, self.website_descriptions[d]))
         else:
             self.website_descriptions[d] = self.url
