@@ -101,3 +101,22 @@ class WebsiteTests(testtools.TestCase):
             self.assertTrue(any(issue["warning"] == WARNINGS["ROBOTS.TXT"]
                                 for issue in wp.issues),
                             "{0} not raised.".format(WARNINGS["ROBOTS.TXT"]))
+
+    @ddt.data("200", "404", "500")
+    @mock.patch('seo_report.website.requests.get')
+    def test_analyze_blog(self, resp_code, mock_requests):
+        mock_requests.return_value.status_code = int(resp_code)
+
+        wp = website.Spider(self.site_url, None)
+        wp._analyze_blog()
+
+        if int(resp_code) == requests.codes.ok:
+            self.assertTrue(
+                any(earned["achievement"] == BADGES["BLOG_DETECTED"]
+                    for earned in wp.achieved),
+                "{0} not earned".format(BADGES["BLOG_DETECTED"]))
+        else:
+            self.assertTrue(
+                any(issue["warning"] == WARNINGS["BLOG_MISSING"]
+                    for issue in wp.issues),
+                "{0} not raised.".format(WARNINGS["BLOG_MISSING"]))
