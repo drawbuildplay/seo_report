@@ -328,10 +328,10 @@ class Webpage(object):
             src = image.get('src', image.get('data-src', ''))
 
             if len(src) == 0:
-                self.warn(WARNINGS["IMAGE_SRC_MISSING"], image)
+                self.warn(WARNINGS["IMAGE_SRC_MISSING"], str(image))
             else:
                 if len(image.get('alt', '')) == 0:
-                    self.warn(WARNINGS["IMAGE_ALT_MISSING"], image)
+                    self.warn(WARNINGS["IMAGE_ALT_MISSING"], str(image))
 
                 # Avoid using generic filenames like
                 # "image1.jpg", "pic.gif", "1.jpg" when possible.

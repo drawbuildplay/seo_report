@@ -10,7 +10,7 @@ from six.moves.urllib import parse
 class Spider(object):
     report = {"pages": []}
 
-    def __init__(self, site, sitemap=None):
+    def __init__(self, site, sitemap=None, page=None):
         parsed_url = parse.urlparse(site)
 
         self.domain = "{0}://{1}".format(parsed_url.scheme, parsed_url.netloc)
@@ -25,12 +25,14 @@ class Spider(object):
         if sitemap is not None:
             # add all locations in the sitemap to the pages_to_crawl table
             locations = []
-            resp = requests.get(sitemap)
+            resp = requests.get(self.domain + sitemap)
             if resp.status_code == requests.codes.ok:
                 locations = self._parse_sitemap(resp.content)
 
             self.pages_to_crawl.append(site)
             self.pages_to_crawl.extend(locations)
+        elif page is not None:
+            self.pages_to_crawl.append(site + page)
         else:
             self.pages_to_crawl.append(site)
 
@@ -99,8 +101,6 @@ class Spider(object):
 
         # iterate over individual pages to crawl
         for page_url in self.pages_to_crawl:
-            print("Crawled {0} Pages of {1}".format(
-                len(self.pages_crawled), len(self.pages_to_crawl)))
             resp = requests.get(page_url)
 
             if resp.status_code == requests.codes.ok:
@@ -112,6 +112,10 @@ class Spider(object):
 
                 # mark the page as crawled
                 self.pages_crawled.append(page_url.strip().lower())
+
+                print("Crawled {0} Pages of {1}: {2}".format(
+                    len(self.pages_crawled), len(self.pages_to_crawl), page_url))
+            
             elif resp.status_code == requests.codes.not_found:
                 self.warn(WARNINGS["BROKEN_LINK"], page_url)
             else:
@@ -120,8 +124,8 @@ class Spider(object):
                               resp.status_code, page_url))
 
         # aggregate the site wide issues/achievements
-        self.report['site'] = {}
-        self.report['site']["issues"] = self.issues
-        self.report['site']["achieved"] = self.achieved
+        self.report["site"] = {}
+        self.report["site"]["issues"] = self.issues
+        self.report["site"]["achieved"] = self.achieved
 
         return self.report

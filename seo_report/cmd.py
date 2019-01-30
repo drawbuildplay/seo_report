@@ -16,15 +16,20 @@ def create_parser():
 
     parser.add_argument(
         '-s', '--sitemap', type=str, required=False,
-        default="/sitemap.xml",
         help='Sitemap.xml file to use'
     )
+
+    parser.add_argument(
+         '-p', '--page', type=str, required=False,
+        help='Single Page to analyze'
+    )
+
 
     return parser
 
 
-def analyze(domain, sitemap):
-    spider = website.Spider(domain, sitemap)
+def analyze(domain, sitemap, page):
+    spider = website.Spider(domain, sitemap, page)
     report = spider.crawl()
 
     return (json.dumps(report, indent=4, separators=(',', ': ')))
@@ -33,7 +38,7 @@ def analyze(domain, sitemap):
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    report = analyze(args.domain, args.domain + args.sitemap)
+    report = analyze(args.domain, args.sitemap, args.page)
 
     print(report)
 
